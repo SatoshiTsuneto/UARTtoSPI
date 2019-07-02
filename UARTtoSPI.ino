@@ -1,4 +1,4 @@
-nclude <SPI.h>
+#include <SPI.h>
 #include <stdint.h>
 
 // モータのビットデータ
