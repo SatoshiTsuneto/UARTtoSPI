@@ -1,8 +1,15 @@
 #include <SPI.h>
 #include <stdint.h>
+#include <Arduino.h>
+
+void uart_setup();
+
+void spi_setup();
+
+void write_spi();
 
 // モータのビットデータ
-uint64_t InitData[]{
+const uint64_t InitData[]{
         0b111111111011000000010111100000000000000000000000,
         0b111111111011000000010000000001100000000000000000,
         0b111111111011000000010000100000000001011110000000,
@@ -14,13 +21,17 @@ uint64_t InitData[]{
         0b111111111011000000010010000001010000000000001000,
 };
 
-uint64_t MoveData[]{
+const uint64_t MoveData[]{
         0b111111111011000000000111111000111111011111111000,
         0b111111111011000000000111111000100000000000001000,
 };
 
 void setup() {
-    Serial.begin(9600);
+    uart_setup();
+    spi_setup();
+}
+
+void spi_setup() {
     pinMode(SS, OUTPUT); //デジタル10番ピンをOUTPUTに設定
     digitalWrite(SS, HIGH); //デジタルの10番ピンからHighを出力
     SPI.setBitOrder(MSBFIRST); // 下位ビットから送信
@@ -29,8 +40,13 @@ void setup() {
     SPI.begin(); //SPI通信の初期化、有効化
 }
 
-bool Flg = true;
-void loop() {
+void uart_setup() {
+    Serial.begin(9600);
+}
+
+bool Flg{true}; //なんのフラグだろ...
+
+void write_spi() {
     if (Flg) {
         Flg = false;
         // 制御するデバイスに通信の開始を通知する
@@ -46,6 +62,11 @@ void loop() {
         // 制御するデバイスに通信の終了を通知する
         digitalWrite(SS, HIGH);
     }
+}
+
+
+void loop() {
+    write_spi();
 }
 
 
