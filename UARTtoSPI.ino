@@ -4,6 +4,7 @@
 
 void write_spi(struct MotorCmd cmd);
 
+// PC側と取り決めた値を定義
 enum UART_CMD {
     CIRCLE_CLOCKWISE = 0x10,
     CIRCLE_COUNTERCLOCKWISE = 0x11,
@@ -11,10 +12,13 @@ enum UART_CMD {
     SWIPE_TO_LEFT = 0x13
 };
 
+// モーターのコマンドを保持する構造体
+// 配列は定数かつ値渡しで関数に渡したいため、ラップする構造体を用意
 struct MotorCmd {
     uint64_t data_set[2];
 };
 
+// TODO : 以下配列の中身はダミーデータなので正しく対応するコマンド(bit列)を組み立てる
 const struct MotorCmd motor_up{
         0b111111111011000000000111111000111111011111111000,
         0b111111111011000000000111111000100000000000001000
@@ -35,7 +39,8 @@ const struct MotorCmd motor_counterclockwise{
         0b111111111011000000000111111000100000000000001000
 };
 
-// モータのビットデータ
+// 初期化要コマンドは関数に渡したり刷ることが無いのでそのままconstで定義
+// 検討: 上の構造体で統一すべき？(現状は配列のサイズが違うため分けたまま)
 const uint64_t InitData[]{
         0b111111111011000000010111100000000000000000000000,
         0b111111111011000000010000000001100000000000000000,
@@ -101,11 +106,11 @@ void loop() {
             break;
 
         case -1:
-            // TODO : 接続のエラー処理
+            // TODO : 接続のエラーの場合-1なので適切な例外処理を記述する
             break;
 
         default:
-            // TODO: 例外処理
+            // TODO: 取り決めた上で定義したenum以外の値が飛んできた場合の例外処理
             break;
     }
 }
