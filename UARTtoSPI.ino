@@ -8,6 +8,13 @@ void spi_setup();
 
 void write_spi();
 
+enum UART_CMD {
+    CIRCLE_CLOCKWISE = 0x10,
+    CIRCLE_COUNTERCLOCKWISE = 0x11,
+    SWIPE_TO_RIGHT = 0x12,
+    SWIPE_TO_LEFT = 0x13
+};
+
 // モータのビットデータ
 const uint64_t InitData[]{
         0b111111111011000000010111100000000000000000000000,
@@ -66,7 +73,33 @@ void write_spi() {
 
 
 void loop() {
-    write_spi();
+
+    switch (Serial.read()) {
+
+        case CIRCLE_CLOCKWISE:
+            write_spi();
+            break;
+
+        case CIRCLE_COUNTERCLOCKWISE:
+            write_spi();
+            break;
+
+        case SWIPE_TO_LEFT:
+            write_spi();
+            break;
+
+        case SWIPE_TO_RIGHT:
+            write_spi();
+            break;
+
+        case -1:
+            // TODO : 接続のエラー処理
+            break;
+
+        default:
+            // TODO: 例外処理
+            break;
+    }
 }
 
 
