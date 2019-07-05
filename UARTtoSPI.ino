@@ -2,17 +2,37 @@
 #include <stdint.h>
 #include <Arduino.h>
 
-void uart_setup();
-
-void spi_setup();
-
-void write_spi();
+void write_spi(struct MotorCmd cmd);
 
 enum UART_CMD {
     CIRCLE_CLOCKWISE = 0x10,
     CIRCLE_COUNTERCLOCKWISE = 0x11,
     SWIPE_TO_RIGHT = 0x12,
     SWIPE_TO_LEFT = 0x13
+};
+
+struct MotorCmd {
+    uint64_t data_set[2];
+};
+
+const struct MotorCmd motor_up{
+        0b111111111011000000000111111000111111011111111000,
+        0b111111111011000000000111111000100000000000001000
+};
+
+const struct MotorCmd motor_down{
+        0b111111111011000000000111111000111111011111111000,
+        0b111111111011000000000111111000100000000000001000
+};
+
+const struct MotorCmd motor_clockwise{
+        0b111111111011000000000111111000111111011111111000,
+        0b111111111011000000000111111000100000000000001000
+};
+
+const struct MotorCmd motor_counterclockwise{
+        0b111111111011000000000111111000111111011111111000,
+        0b111111111011000000000111111000100000000000001000
 };
 
 // モータのビットデータ
@@ -34,11 +54,10 @@ const uint64_t MoveData[]{
 };
 
 void setup() {
-    uart_setup();
-    spi_setup();
-}
+    //UART通信のセットアップ
+    Serial.begin(9600);
 
-void spi_setup() {
+    // SPI通信のセットアップ
     pinMode(SS, OUTPUT); //デジタル10番ピンをOUTPUTに設定
     digitalWrite(SS, HIGH); //デジタルの10番ピンからHighを出力
     SPI.setBitOrder(MSBFIRST); // 下位ビットから送信
@@ -47,28 +66,22 @@ void spi_setup() {
     SPI.begin(); //SPI通信の初期化、有効化
 }
 
-void uart_setup() {
-    Serial.begin(9600);
-}
+void write_spi(struct MotorCmd cmd) {
 
-bool Flg{true}; //なんのフラグだろ...
-
-void write_spi() {
-    if (Flg) {
-        Flg = false;
-        // 制御するデバイスに通信の開始を通知する
-        digitalWrite(SS, LOW);
-        for (uint64_t data:InitData) {
-            SPI.transfer(&data, 6);
-            delay(10); //必要に応じて設定
-        }
-        for (uint64_t data:MoveData) {
-            SPI.transfer(&data, 6);
-            delay(10); //必要に応じて設定
-        }
-        // 制御するデバイスに通信の終了を通知する
-        digitalWrite(SS, HIGH);
+    // 制御するデバイスに通信の開始を通知する
+    digitalWrite(SS, LOW);
+    for (auto data:InitData) {
+        SPI.transfer(&data, 6);
+        delay(10); //必要に応じて設定
     }
+
+    for (auto data:cmd.data_set) {
+        SPI.transfer(&data, 6);
+        delay(10); //必要に応じて設定
+    }
+
+    // 制御するデバイスに通信の終了を通知する
+    digitalWrite(SS, HIGH);
 }
 
 
@@ -77,19 +90,19 @@ void loop() {
     switch (Serial.read()) {
 
         case CIRCLE_CLOCKWISE:
-            write_spi();
+            write_spi(motor_clockwise);
             break;
 
         case CIRCLE_COUNTERCLOCKWISE:
-            write_spi();
+            write_spi(motor_counterclockwise);
             break;
 
         case SWIPE_TO_LEFT:
-            write_spi();
+            write_spi(motor_down);
             break;
 
         case SWIPE_TO_RIGHT:
-            write_spi();
+            write_spi(motor_up);
             break;
 
         case -1:
