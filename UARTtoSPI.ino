@@ -1,6 +1,5 @@
 #include <SPI.h>
 #include <stdint.h>
-#include <Arduino.h>
 
 void write_spi(struct MotorCmd cmd);
 
@@ -39,7 +38,7 @@ const struct MotorCmd motor_counterclockwise{
         0b111111111011000000000111111000100000000000001000
 };
 
-// 初期化要コマンドは関数に渡したり刷ることが無いのでそのままconstで定義
+// 初期化要コマンドは関数に渡したりすることが無いのでそのままconstで定義
 // 検討: 上の構造体で統一すべき？(現状は配列のサイズが違うため分けたまま)
 const uint64_t InitData[]{
         0b111111111011000000010111100000000000000000000000,
@@ -87,7 +86,7 @@ void write_spi(struct MotorCmd cmd) {
 
 void loop() {
 
-    switch (Serial.read()) {
+    switch (uint32_t(Serial.read())) {
 
         case CIRCLE_CLOCKWISE:
             write_spi(motor_clockwise);
@@ -105,9 +104,10 @@ void loop() {
             write_spi(motor_up);
             break;
 
-        case -1:
-            // TODO : 接続のエラーの場合-1なので適切な例外処理を記述する
-            break;
+            //FIXME : なぜかreadした値がunsignedになってしまっているので例外処理ができない。
+//        case -1:
+//            // TODO : 接続のエラーの場合-1なので適切な例外処理を記述する
+//            break;
 
         default:
             // TODO: 取り決めた上で定義したenum以外の値が飛んできた場合の例外処理
