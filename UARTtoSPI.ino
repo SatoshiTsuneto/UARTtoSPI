@@ -59,10 +59,10 @@ void setup() {
     // SPI通信のセットアップ
     pinMode(SS, OUTPUT); //デジタル10番ピンをOUTPUTに設定
     digitalWrite(SS, HIGH); //デジタルの10番ピンからHighを出力
-    SPI.setBitOrder(MSBFIRST); // 下位ビットから送信
-    SPI.setClockDivider(SPI_CLOCK_DIV8); //分周器1/8を指定 同期クロック16/8=2MHz
-    SPI.setDataMode(SPI_MODE3); //アイドル時Low、立上がりエッジでデータ取得
-    SPI.begin(); //SPI通信の初期化、有効化
+    SPIClass::setBitOrder(MSBFIRST); // 最上位ビットから送信
+    SPIClass::setClockDivider(SPI_CLOCK_DIV8); //分周器1/8を指定 同期クロック16/8=2MHz
+    SPIClass::setDataMode(SPI_MODE3); //アイドル時Low、立上がりエッジでデータ取得
+    SPIClass::begin(); //SPI通信の初期化、有効化
 }
 
 void write_spi(struct MotorCmd cmd) {
@@ -70,12 +70,12 @@ void write_spi(struct MotorCmd cmd) {
     // 制御するデバイスに通信の開始を通知する
     digitalWrite(SS, LOW);
     for (auto data:InitData) {
-        SPI.transfer(&data, 6);
+        SPIClass::transfer(&data, 6);
         delay(10); //必要に応じて設定
     }
 
     for (auto data:cmd.data_set) {
-        SPI.transfer(&data, 6);
+        SPIClass::transfer(&data, 6);
         delay(10); //必要に応じて設定
     }
 
