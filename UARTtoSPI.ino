@@ -20,12 +20,11 @@ uint64_t MoveData[]{
 };
 
 void setup() {
-    Serial.begin(9600);
     pinMode(SS, OUTPUT); //デジタル10番ピンをOUTPUTに設定
     digitalWrite(SS, HIGH); //デジタルの10番ピンからHighを出力
-    SPI.setBitOrder(MSBFIRST); // 下位ビットから送信
+    SPI.setBitOrder(MSBFIRST); // 上位位ビットから送信
     SPI.setClockDivider(SPI_CLOCK_DIV8); //分周器1/8を指定 同期クロック16/8=2MHz
-    SPI.setDataMode(SPI_MODE3); //アイドル時Low、立上がりエッジでデータ取得
+    SPI.setDataMode(SPI_MODE3); //アイドル時Low、下がりエッジでデータ取得
     SPI.begin(); //SPI通信の初期化、有効化
 }
 
@@ -41,7 +40,7 @@ void loop() {
         }
         for (uint64_t data:MoveData) {
             SPI.transfer(&data, 6);
-            delay(10); //必要に応じて設定
+            delay(10);
         }
         // 制御するデバイスに通信の終了を通知する
         digitalWrite(SS, HIGH);
